@@ -15,8 +15,8 @@ export class AddtipPage implements OnInit {
   }
   taskObj;
 
-  async close(){
-    await this.model.dismiss(this.taskObj);
+   close(){
+     this.model.dismiss(this.taskObj);
   }
 
   submittedForm(form:NgForm)

@@ -24,7 +24,18 @@ const routes: Routes = [
               },
               {
                 path:'crop-tips',
-                loadChildren: () => import('./home/crop/crop-tips/crop-tips.module').then( m => m.CropTipsPageModule)
+                children:[
+                  {
+                    path:'',
+                    loadChildren: () => import('./home/crop/crop-tips/crop-tips.module').then( m => m.CropTipsPageModule)
+                  },
+                  {
+                    path:":id",
+                    loadChildren: () => import('./home/crop/crop-tips/croptipsdetails/croptipsdetails.module').then( m => m.CroptipsdetailsPageModule)
+
+                  }
+
+                ]
               },
               {
                 path:'diseases',

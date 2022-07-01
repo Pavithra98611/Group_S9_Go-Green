@@ -1,6 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { AnimationController, ModalController } from '@ionic/angular';
+import { AnimationController, LoadingController, ModalController } from '@ionic/angular';
+import { Subscription } from 'rxjs';
+import { CropTips } from 'src/app/admin/models/croptips.models';
+import { HomeService } from 'src/app/admin/service/home.service';
 import { AddtipPage } from './addtip/addtip.page';
 
 @Component({
@@ -8,37 +11,74 @@ import { AddtipPage } from './addtip/addtip.page';
   templateUrl: './crop-tips.page.html',
   styleUrls: ['./crop-tips.page.scss'],
 })
-export class CropTipsPage implements OnInit {
+export class CropTipsPage implements OnInit,OnDestroy{
 
-  constructor(private animationCtrl: AnimationController,private modelCtrl: ModalController) { }
+  constructor(private animationCtrl: AnimationController,
+    private loadCtrl:LoadingController,
+    private modelCtrl: ModalController,private homeService:HomeService) { }
+
+  tipSub:Subscription
+  cropTips:CropTips[];
+  isLoading = false
 
   ngOnInit() {
-
+    this.isLoading = true
+    this.tipSub = this.homeService.AllcropTips.subscribe(tips=>{
+      this.cropTips = tips
+      this.isLoading = false
+    })
   }
 
-  cropTips = [
-  ]
-
-  async addCropTips()
+  ionViewWillEnter()
   {
-      const model = await this.modelCtrl.create({
+    this.isLoading = true
+    this.tipSub = this.homeService.fetchAlltips().subscribe(tips=>{
+      this.cropTips = tips
+      this.isLoading = false
+    })
+  }
+
+   addCropTips()
+  {
+      this.modelCtrl.create({
         component: AddtipPage
-      });
+      }).then(el=>{
+        el.present();
+        return el.onDidDismiss()
+      }).then(data=>{
 
-      model.onDidDismiss().then(newobj=>{
-        this.cropTips.push(newobj.data);
+          this.loadCtrl.create({
+            message:"Adding...",
+            duration:2000
+          }).then(el=>{
+            el.present()
+            this.homeService.addTips(
+              data.data.Title,
+              data.data.Subtitle,
+              data.data.information
+             ).subscribe(()=>{
+              el.dismiss()
 
+             })
+          })
       })
 
-      return await model.present();
   }
 
-  async close(){
-    await this.modelCtrl.dismiss(this.taskObj);
+   close(){
+     this.modelCtrl.dismiss(this.taskObj);
   }
 
   taskObj;
 
+
+  ngOnDestroy()
+  {
+    if(this.tipSub)
+    {
+      this.tipSub.unsubscribe()
+    }
+  }
 
 
 }

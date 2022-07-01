@@ -11,6 +11,10 @@ const routes: Routes = [
   {
     path: 'addtip',
     loadChildren: () => import('./addtip/addtip.module').then( m => m.AddtipPageModule)
+  },
+  {
+    path: 'croptipsdetails',
+    loadChildren: () => import('./croptipsdetails/croptipsdetails.module').then( m => m.CroptipsdetailsPageModule)
   }
 ];
 
